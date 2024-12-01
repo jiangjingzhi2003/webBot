@@ -36,7 +36,6 @@ def detectCAPTCHA(imageData):
         if read_result.status not in ['notStarted', 'running']:
             break
         time.sleep(1)
-
     # Display OCR results
     if read_result.status == 'succeeded':
         for page in read_result.analyze_result.read_results:
@@ -54,6 +53,9 @@ def is_captcha(text):
             return True
       # use LLM to check CAPTCHA
       prompt = detect_CAPTACH_prompt(text)
+      # TODO Limit the use rate of LLM
+      if (len(prompt) > 100): prompt = prompt[:300]
+      print(prompt)
       llm_output = generate(prompt)
       if re.search(r'true|True', llm_output):
             return True

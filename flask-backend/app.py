@@ -9,9 +9,11 @@ app = Flask(__name__)
 
 @app.route("/detect", methods=["POST"])
 def detect_captcha():
+    print('start captcha detection')
     data = request.get_json()
     screenshot = data.get("screenshot")
-    
+    if ('detected' in data) and data['detected'] :
+        return jsonify({"double_checked": False, "contains_captcha": True})
     if screenshot:
         # Decode the Base64 image
         image_data = base64.b64decode(screenshot.split(",")[1])

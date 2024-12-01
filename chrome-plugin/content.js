@@ -5,8 +5,7 @@ if (hasCAPTCHAIndicators) {
     // Notify the background script
     chrome.runtime.sendMessage({ detectedCAPTCHA: true });
 } else {
-    chrome.runtime.sendMessage({ detectedCAPTCHA: false });
-    chrome.runtime.sendMessage({ takeScreenshot: true }, (response) => {
+    chrome.runtime.sendMessage({ detectedCAPTCHA: false, takeScreenshot: true }, (response) => {
         console.log("Screenshot Response:", response);
     });
 }
