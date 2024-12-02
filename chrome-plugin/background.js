@@ -1,11 +1,16 @@
 chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
+    if (message.imageUrls) {
+        console.log("Images extracted from the page:", message.imageUrls);
+        // Optionally, process the images here
+    }
+    
     // Handle CAPTCHA detection message
     if (message.detectedCAPTCHA) {
         console.log("Detected CAPTCHA, sending to backend...");
         fetch("http://127.0.0.1:5000/detect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ detected: message.detectedCAPTCHA })
+            body: JSON.stringify({ detected: message.detectedCAPTCHA, imageURL:message.imageUrls})
         })
         .then(response => response.json())
         .then(data => {
@@ -34,7 +39,7 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
             fetch("http://127.0.0.1:5000/detect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ screenshot: dataUrl })
+                body: JSON.stringify({ screenshot: dataUrl, imageURL:message.imageUrls})
             })
             .then(response => response.json())
             .then(data => {

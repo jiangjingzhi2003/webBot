@@ -23,6 +23,7 @@ computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredenti
 def detectCAPTCHA(imageData):
     image_stream = imageData
     analysis = computervision_client.analyze_image_in_stream(image_stream, visual_features=["Objects", "Tags", "Description"])
+    print(f'computer vision analysis of current tab {analysis}')
     result = ''
 
     image_stream.seek(0)  # Reset stream position
@@ -45,6 +46,7 @@ def detectCAPTCHA(imageData):
         return True
     return False
     
+# function takes in text extracted from a screenshot of a website and check if the website contain keywords
 def is_captcha(text):
       print(text)
       regex_captcha = r'CAPTCHA|captcha|I\'m not a robot'
@@ -56,9 +58,9 @@ def is_captcha(text):
       # TODO Limit the use rate of LLM
       if (len(prompt) > 100): prompt = prompt[:300]
       print(prompt)
-      llm_output = generate(prompt)
-      if re.search(r'true|True', llm_output):
-            return True
+      # llm_output = generate(prompt)
+      # if re.search(r'true|True', llm_output):
+            # return True
       return False
 
 
@@ -107,3 +109,33 @@ def generate(prompt: List[Dict[str, str]], temperature: float = 0.7, top_p: floa
     model='gpt-4',    
     messages= prompt)
     return response.choices[0].message.content
+
+# classify all images extracted from the web
+def classifyMultiImages(imageURLs):
+	for img in imageURLs:
+		classifyImage(img)
+
+# classify a single image using image url
+def classifyImage(read_image_url):
+	read_response  = computervision_client.read(read_image_url ,  raw=True)
+	print(read_response)
+
+	result = ''
+	# Get the operation location (URL with an ID at the end) from the response
+	read_operation_location = read_response.headers["Operation-Location"]
+	# Grab the ID from the URL
+	operation_id = read_operation_location.split("/")[-1]
+	
+	# Call the "GET" API and wait for it to retrieve the results 
+	while True:
+		read_result = computervision_client.get_read_result(operation_id)
+		if read_result.status not in ['notStarted', 'running']:
+			break
+		time.sleep(1)
+
+	# Add the detected text to result, line by line
+	if read_result.status == OperationStatusCodes.succeeded:
+		for text_result in read_result.analyze_result.read_results:
+			for line in text_result.lines:
+				result = result + " " + line.text
+	return result
