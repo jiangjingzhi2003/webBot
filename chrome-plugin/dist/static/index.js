@@ -4090,7 +4090,7 @@
     }
     console.log("Detected webpage, sending to backend..." + newContent);
     console.log("display content"+ newContent);
-    fetch("http://127.0.0.1:5000/summary", {
+    fetch("https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({textContent:newContent})

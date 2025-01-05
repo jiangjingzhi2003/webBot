@@ -40,7 +40,7 @@ def detect_captcha():
 def summarize():
     data = request.get_json()
     textContent = data.get('textContent')
-    summary_content = summarizeText(textContent[:700])
+    summary_content = summarizeText(textContent[:400])
     return jsonify({"summary_success":False, "summary_content":summary_content})
 
 if __name__ == "__main__":

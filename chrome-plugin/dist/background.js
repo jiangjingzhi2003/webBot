@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
     // Handle CAPTCHA detection message
     if (message.detectedCAPTCHA) {
         console.log("Detected CAPTCHA, sending to backend...");
-        fetch("http://127.0.0.1:5000/detect", {
+        fetch("https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/detect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ detected: message.detectedCAPTCHA, imageURL:message.imageUrls, textContent:message.parsedContent})
@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
             }
 
             console.log("Screenshot captured, sending to backend...");
-            fetch("http://127.0.0.1:5000/detect", {
+            fetch("https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/detect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ screenshot: dataUrl, imageURL:message.imageUrls})
