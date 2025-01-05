@@ -10,6 +10,7 @@ import re
 from typing import List, Dict, Any, Callable
 from openai import AzureOpenAI
 from prompt.captcha_prompt import detect_CAPTACH_prompt
+from prompt.summary_prompt import summary_prompt
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredenti
 def detectCAPTCHA(imageData):
     image_stream = imageData
     analysis = computervision_client.analyze_image_in_stream(image_stream, visual_features=["Objects", "Tags", "Description"])
-    print(f'computer vision analysis of current tab {analysis}')
+    # print(f'computer vision analysis of current tab {analysis}')
     result = ''
 
     image_stream.seek(0)  # Reset stream position
@@ -31,8 +32,8 @@ def detectCAPTCHA(imageData):
 
     operation_location = ocr_result.headers["Operation-Location"] 
     operation_id = operation_location.split("/")[-1]
-
-    while True:
+	
+    """while True:
         read_result = computervision_client.get_read_result(operation_id)
         if read_result.status not in ['notStarted', 'running']:
             break
@@ -41,14 +42,13 @@ def detectCAPTCHA(imageData):
     if read_result.status == 'succeeded':
         for page in read_result.analyze_result.read_results:
             for line in page.lines:
-                result = result + " " + line.text
+                result = result + " " + line.text"""
     if is_captcha(result):
         return True
     return False
     
 # function takes in text extracted from a screenshot of a website and check if the website contain keywords
 def is_captcha(text):
-      print(text)
       regex_captcha = r'CAPTCHA|captcha|I\'m not a robot'
       imnotrobot = r'I\'m not a robot'
       if re.search(regex_captcha, text):
@@ -57,16 +57,13 @@ def is_captcha(text):
       prompt = detect_CAPTACH_prompt(text)
       # TODO Limit the use rate of LLM
       if (len(prompt) > 100): prompt = prompt[:300]
-      print(prompt)
       # llm_output = generate(prompt)
       # if re.search(r'true|True', llm_output):
             # return True
       return False
 
-
 def extractTextFromImage(read_image_url):
 	read_response  = computervision_client.read(read_image_url ,  raw=True)
-	print(read_response)
 
 	result = ''
 	# Get the operation location (URL with an ID at the end) from the response
@@ -139,3 +136,10 @@ def classifyImage(read_image_url):
 			for line in text_result.lines:
 				result = result + " " + line.text
 	return result
+
+def summarizeText(text):
+    prompt = summary_prompt(text)
+    # TODO Limit the use rate of LLM
+    if (len(prompt) > 100): prompt = prompt[:300]
+    llm_output = generate(prompt)
+    return llm_output

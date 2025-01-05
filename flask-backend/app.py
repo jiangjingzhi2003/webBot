@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
-from util import extractTextFromImage, detectCAPTCHA
+from util import extractTextFromImage, detectCAPTCHA, summarizeText
 import io, base64
 from PIL import Image
 
@@ -13,6 +13,7 @@ def detect_captcha():
     data = request.get_json()
 
     images = data.get('imageURL', [])  # List of image URLs or Base64 strings
+    textContent = data.get('textContent')
     if not images:
         return jsonify({'error': 'No images provided'}), 400
     
@@ -34,6 +35,13 @@ def detect_captcha():
         return jsonify({"double_checked": True, "contains_captcha": contains_captcha})
     
     return jsonify({"contains_captcha": False})
+
+@app.route("/summary", methods=["POST"])
+def summarize():
+    data = request.get_json()
+    textContent = data.get('textContent')
+    summary_content = summarizeText(textContent[:700])
+    return jsonify({"summary_success":False, "summary_content":summary_content})
 
 if __name__ == "__main__":
     app.run(debug=True)
