@@ -1,3 +1,6 @@
+const api_endpoint_deploy = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
+const api_endpoint = 'http://127.0.0.1:5000'
+
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
@@ -18,19 +21,17 @@ async function showSummary(tabId) {
         target: { tabId },
         files: ['scripts/content.js']
     });
-    console.log("output from content.js " + injection[0].result)
     chrome.storage.session.set({ pageContent: injection[0].result});
 }
 
 chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
-    console.log(message)
     if (!message.imageUrls) {
         console.log("no image in the website");
     }
     // Handle CAPTCHA detection message
     if (message.detectedCAPTCHA) {
         console.log("Detected CAPTCHA, sending to backend...");
-        fetch("https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/detect", {
+        fetch(api_endpoint + "/detect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ detected: message.detectedCAPTCHA, imageURL:message.imageUrls, textContent:message.parsedContent})
@@ -59,7 +60,7 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
             }
 
             console.log("Screenshot captured, sending to backend...");
-            fetch("https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/detect", {
+            fetch(api_endpoint + "/detect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ screenshot: dataUrl, imageURL:message.imageUrls})
