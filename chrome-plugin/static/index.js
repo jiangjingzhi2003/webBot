@@ -20,8 +20,8 @@ const summarizeButton = document.getElementById("summarize-btn");
 const queryButton = document.getElementById("query-btn");
 const queryInput = document.getElementById("query-input");
 
-const api_endpoint_summary = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net/summary'
-const api_endpoint = 'http://127.0.0.1:5000'
+const api_endpoint_remote = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
+const api_endpoint_local = 'http://127.0.0.1:5000'
 
 // Toggle between Summarizer and Query modes
 toggleModeButton.addEventListener('click', () => {
@@ -132,7 +132,7 @@ async function generateSummary(newContent, config){
   console.log("Detected webpage, sending to backend...");
   console.log("Current config: ", config);
   try {
-    const response = await fetch(api_endpoint + "/summary", {
+    const response = await fetch(api_endpoint_remote + "/summary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ textContent: newContent, config: config }),
@@ -175,7 +175,7 @@ function sleep(ms) {
 async function queryContent(content, query) {
   console.log('Querying content...');
   try {
-    const response = await fetch(api_endpoint + "/query", {
+    const response = await fetch(api_endpoint_remote + "/query", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ textContent: content, query: query }),

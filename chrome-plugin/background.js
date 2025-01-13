@@ -31,7 +31,7 @@ async function showSummary(tabId) {
     // Handle CAPTCHA detection message
     if (message.detectedCAPTCHA) {
         console.log("Detected CAPTCHA, sending to backend...");
-        fetch(api_endpoint + "/detect", {
+        fetch(api_endpoint_remote + "/detect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ detected: message.detectedCAPTCHA, imageURL:message.imageUrls, textContent:message.parsedContent})
@@ -60,7 +60,7 @@ async function showSummary(tabId) {
             }
 
             console.log("Screenshot captured, sending to backend...");
-            fetch(api_endpoint + "/detect", {
+            fetch(api_endpoint_remote + "/detect", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ screenshot: dataUrl, imageURL:message.imageUrls})
