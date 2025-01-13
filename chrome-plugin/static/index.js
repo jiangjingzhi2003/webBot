@@ -22,6 +22,7 @@ const queryInput = document.getElementById("query-input");
 
 const api_endpoint_remote = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
 const api_endpoint_local = 'http://127.0.0.1:5000'
+let newWebContent = true //check if web content changed
 
 // Toggle between Summarizer and Query modes
 toggleModeButton.addEventListener('click', () => {
@@ -68,18 +69,22 @@ async function onConfigChange() {
   e.addEventListener('change', onConfigChange)
 );
 
+fetchPageContent(currentMode)
 //get page content from temporary storage in Chrome browser
-chrome.storage.session.get('pageContent', ({ pageContent:storedContent }) => {
-  pageContent = storedContent || ''; 
-  console.log('page content right after fetch from storage ' + pageContent)
-  showSummary('Loading...')
-  if (currentMode === 'summerizer'){
-    onContentChange(pageContent);
-  }
-});
+function fetchPageContent(currentMode) {
+  chrome.storage.session.get('pageContent', ({ pageContent:storedContent }) => {
+    pageContent = storedContent || ''; 
+    console.log('page content right after fetch from storage ' + pageContent)
+    if (currentMode === 'summerizer'){
+      showSummary('Loading...')
+      onContentChange(pageContent);
+    }
+  });
+}
 
 chrome.storage.session.onChanged.addListener((changes) => {
   const pageContent = changes['pageContent'];
+  newWebContent = true
   console.log('page content changed, the current page content is ' + pageContent.newValue);
   if (currentMode === 'summerizer'){
     showSummary('Loading...')
@@ -99,11 +104,12 @@ queryButton.addEventListener("click", () => {
     resultsContent.textContent = "Please enter a query.";
     return;
   }
-
   resultsCard.hidden = false;
-  queryContent(pageContent, query);
+  showAnswer('Loading...')
+  console.log(newWebContent)
+  queryContent(pageContent, query, !newWebContent);
+  newWebContent = false
 });
-
 
 async function onContentChange(newContent, config=config_default) {
   if (pageContent == newContent) {
@@ -172,13 +178,13 @@ function sleep(ms) {
 }
 
 // Query website content
-async function queryContent(content, query) {
+async function queryContent(content, query, samePage=false) {
   console.log('Querying content...');
   try {
     const response = await fetch(api_endpoint_remote + "/query", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ textContent: content, query: query }),
+      body: JSON.stringify({ textContent: content, query: query, samePage:samePage}),
     });
 
     if (!response.ok) {
