@@ -24,7 +24,7 @@ async function showSummary(tabId) {
     chrome.storage.session.set({ pageContent: injection[0].result});
 }
 
-chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
+/*chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
     if (!message.imageUrls) {
         console.log("no image in the website");
     }
@@ -77,4 +77,4 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
         });
         return true; // Ensure asynchronous response handling
     }
-});
+});*/

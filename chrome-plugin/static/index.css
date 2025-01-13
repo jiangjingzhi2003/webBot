@@ -56,3 +56,7 @@ fieldset > * {
   color: white;
   padding: 1em;
 }
+
+[hidden] {
+  display: none !important;
+}

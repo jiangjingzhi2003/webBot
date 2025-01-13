@@ -5,6 +5,12 @@
   </head>
   <body>
     <div class="card">
+      <h3 id="panel-title">Summarizer</h3>
+      <button id="toggle-mode">Switch to Query Mode</button>
+    </div>
+
+    <!-- Summarizer Panel -->
+    <div id="summarizer-panel" class="card">
       <fieldset>
         <legend>Settings</legend>
         <div>
@@ -32,9 +38,25 @@
           </select>
         </div>
       </fieldset>
+      <div class="warning card" hidden id="warning"></div>
+      <div class="card" id="summary">Nothing to show...</div>
+      <button id="summarize-btn">Summarize</button>
     </div>
-    <div class="warning card" hidden id="warning"></div>
-    <div class="card" id="summary">Nothing to show...</div>
+
+    <!-- Query Panel -->
+    <div id="query-panel" class="card" hidden>
+      <h4>Query Content</h4>
+      <div>
+        <label for="query-input">Ask a question about this page:</label>
+        <textarea id="query-input" rows="3" placeholder="Type your query here..."></textarea>
+      </div>
+      <button id="query-btn">Query</button>
+      <div class="card" id="results-card" hidden>
+        <h4>Results:</h4>
+        <div id="results-content">No results yet...</div>
+      </div>
+    </div>
+
     <script src="index.js" type="module"></script>
   </body>
 </html>

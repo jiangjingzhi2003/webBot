@@ -1,6 +1,6 @@
-# CAPTCHA Detector
+# WebBot
 
-This project is a Chrome extension that detects CAPTCHA elements on web pages and uses a Flask backend with Azure Computer Vision API for advanced CAPTCHA analysis.
+This project is a Chrome extension that summerize the current webcontent. you can also ask question about current website through query page. 
 
 ## **Installation**
 
@@ -17,4 +17,4 @@ This project is a Chrome extension that detects CAPTCHA elements on web pages an
 ### **Flask Backend**
 1. Install Python dependencies:
    ```bash
-   pip install -r flask-backend/requirements.txt
+   pip install -r requirements.txt

@@ -1,11 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import requests
-from util import extractTextFromImage, detectCAPTCHA, summarizeText
+from util import extractTextFromImage, detectCAPTCHA, summarizer, split_text
+from rag import chat_with_web, create_index_from_text
 import io, base64
 from PIL import Image
 
 
 app = Flask(__name__)
+
+@app.route("/home", methods=['GET'])
+def ai():
+    return render_template("index.html")
 
 @app.route("/detect", methods=["POST"])
 def detect_captcha():
@@ -39,9 +44,27 @@ def detect_captcha():
 @app.route("/summary", methods=["POST"])
 def summarize():
     data = request.get_json()
+    print(data['config']['length'])
     textContent = data.get('textContent')
-    summary_content = summarizeText(textContent[:400])
+    configuration = data.get('config')
+    length = configuration['length']
+    summary_content = summarizer(textContent, configuration)
+    if summary_content:
+        return jsonify({"summary_success":True, "summary_content":summary_content})
     return jsonify({"summary_success":False, "summary_content":summary_content})
+
+@app.route("/query", methods=["POST"])
+def query():
+    data = request.get_json()
+    textContent = data.get('textContent')
+    query = data.get('query')
+    chunks = split_text(textContent)
+    index_name = create_index_from_text("newyorktimeindex", chunks)
+    chat_repsonse = chat_with_web(query, index_name, 1)['message']
+    if chat_repsonse:
+        return jsonify({"success":True, "answer":chat_repsonse})
+    return jsonify({"success":False, "answer":chat_repsonse})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
