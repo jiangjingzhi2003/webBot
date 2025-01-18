@@ -1,5 +1,6 @@
-const api_endpoint_deploy = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
-const api_endpoint = 'http://127.0.0.1:5000'
+const api_endpoint_remote = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
+const api_endpoint_local = 'http://127.0.0.1:5000'
+const api_endpoint = api_endpoint_remote
 
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })

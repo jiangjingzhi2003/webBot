@@ -4074,7 +4074,7 @@
   const queryInput = document.getElementById("query-input");
 
   const api_endpoint_remote = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net';
-  const api_endpoint_local = 'http://127.0.0.1:5000';
+  const api_endpoint = api_endpoint_remote;
   let newWebContent = true; //check if web content changed
 
   // Toggle between Summarizer and Query modes
@@ -4191,13 +4191,14 @@
     console.log("Detected webpage, sending to backend...");
     console.log("Current config: ", config);
     try {
-      const response = await fetch(api_endpoint_remote + "/summary", {
+      const response = await fetch(api_endpoint + "/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ textContent: newContent, config: config }),
       });
 
       if (!response.ok) {
+        showSummary('Error!  Fail to regenerate summary');
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
@@ -4234,13 +4235,14 @@
   async function queryContent(content, query, samePage=false) {
     console.log('Querying content...');
     try {
-      const response = await fetch(api_endpoint_local + "/query", {
+      const response = await fetch(api_endpoint + "/query", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ textContent: content, query: query, samePage:samePage}),
       });
 
       if (!response.ok) {
+        showAnswer('Error! No response from LLM');
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 

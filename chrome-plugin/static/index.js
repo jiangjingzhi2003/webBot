@@ -22,6 +22,7 @@ const queryInput = document.getElementById("query-input");
 
 const api_endpoint_remote = 'https://llmbackend-d2huf9hubpg5bfht.westus-01.azurewebsites.net'
 const api_endpoint_local = 'http://127.0.0.1:5000'
+const api_endpoint = api_endpoint_remote
 let newWebContent = true //check if web content changed
 
 // Toggle between Summarizer and Query modes
@@ -41,14 +42,15 @@ toggleModeButton.addEventListener('click', () => {
   warningElement.setAttribute('hidden', '');
 });
 
-
 const config_default = {
   type: summaryTypeSelect.value,
   format: summaryFormatSelect.value,
   length: summaryLengthSelect.value,
   content: '',
 };
-
+/**
+ * change output summary format when summary configuration change
+ */
 async function onConfigChange() {
   const oldContent = pageContent;
 
@@ -70,7 +72,10 @@ async function onConfigChange() {
 );
 
 fetchPageContent(currentMode)
-//get page content from temporary storage in Chrome browser
+/**
+ * get page content from temporary storage in Chrome browser
+ * @param {*} currentMode string, either summerizer | query
+ */
 function fetchPageContent(currentMode) {
   chrome.storage.session.get('pageContent', ({ pageContent:storedContent }) => {
     pageContent = storedContent || ''; 
@@ -81,11 +86,11 @@ function fetchPageContent(currentMode) {
     }
   });
 }
-
+//reload summary content when detect webpage content changed
 chrome.storage.session.onChanged.addListener((changes) => {
   const pageContent = changes['pageContent'];
   newWebContent = true
-  console.log('page content changed, the current page content is ' + pageContent.newValue);
+  console.log('page content changed, reload new summery');
   if (currentMode === 'summerizer'){
     showSummary('Loading...')
     onContentChange(pageContent);
@@ -97,6 +102,7 @@ summarizeButton.addEventListener("click", () => {
   onConfigChange()
 });
 
+// Handle query button function
 queryButton.addEventListener("click", () => {
   const query = queryInput.value.trim();
   if (!query) {
@@ -111,6 +117,12 @@ queryButton.addEventListener("click", () => {
   newWebContent = false
 });
 
+/**
+ * generate new content summary, and show summary in frontend
+ * @param {*} newContent 
+ * @param {*} config 
+ * @returns 
+ */
 async function onContentChange(newContent, config=config_default) {
   if (pageContent == newContent) {
     // no new content, do nothing
@@ -134,17 +146,24 @@ async function onContentChange(newContent, config=config_default) {
   showSummary(summary)
 }
 
+/**
+ * 
+ * @param {*} newContent string
+ * @param {*} config dictionary
+ * @returns summary string
+ */
 async function generateSummary(newContent, config){
   console.log("Detected webpage, sending to backend...");
   console.log("Current config: ", config);
   try {
-    const response = await fetch(api_endpoint_remote + "/summary", {
+    const response = await fetch(api_endpoint + "/summary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ textContent: newContent, config: config }),
     });
 
     if (!response.ok) {
+      showSummary('Error!  Fail to regenerate summary')
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
@@ -164,6 +183,10 @@ async function showSummary(text) {
   summaryElement.innerHTML = DOMPurify.sanitize(marked.parse(text));
 }
 
+/**
+ * create popup warning box in sidepanel
+ * @param {*} warning 
+ */
 async function updateWarning(warning) {
   warningElement.textContent = warning;
   if (warning) {
@@ -172,22 +195,33 @@ async function updateWarning(warning) {
     warningElement.setAttribute('hidden', '');
   }
 }
-
+/**
+ * 
+ * @param {*} ms 
+ * @returns object Promise
+ */
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Query website content
+/**
+ * 
+ * @param {*} content string
+ * @param {*} query string
+ * @param {*} samePage boolean
+ * @returns data['answer'] string, answer from LLM
+ */
 async function queryContent(content, query, samePage=false) {
   console.log('Querying content...');
   try {
-    const response = await fetch(api_endpoint_remote + "/query", {
+    const response = await fetch(api_endpoint + "/query", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ textContent: content, query: query, samePage:samePage}),
     });
 
     if (!response.ok) {
+      showAnswer('Error! No response from LLM. Please retry')
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
